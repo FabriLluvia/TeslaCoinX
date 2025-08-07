@@ -3,11 +3,12 @@ import os
 from transactions import crear_transaccion
 
 WALLET_FILE = "wallet.tscoin"
+BLOCKCHAIN_FILE = "blockchain.tscoin"
 
 def crear_billetera():
     direccion = input("Crea una dirección de wallet (nombre o código): ").strip()
-    clave_publica = os.urandom(32).hex()  # Simulación
-    clave_privada = os.urandom(64).hex()  # Simulación
+    clave_publica = os.urandom(32).hex()
+    clave_privada = os.urandom(64).hex()
 
     wallet = {
         "direccion": direccion,
@@ -71,30 +72,29 @@ def consultar_saldo():
 
     saldo = 0
 
-    if not os.path.exists("blockchain.tscoin"):
+    if not os.path.exists(BLOCKCHAIN_FILE):
         print("\n⚠️ Archivo de blockchain no encontrado.\n")
         return
 
     try:
-        with open("blockchain.tscoin", "r") as archivo:
-            for linea in archivo:
-                if not linea.strip():
-                    continue
+        with open(BLOCKCHAIN_FILE, "r") as archivo:
+            data = json.load(archivo)  # Cargar todo el JSON
 
-                try:
-                    bloque = json.loads(linea)
-                except json.JSONDecodeError:
-                    continue
+            for bloque in data:
+                if bloque.get("miner_wallet") == direccion:
+                    saldo += bloque.get("reward", 0)
 
-                transacciones = bloque.get("transacciones", [])
+                transacciones = bloque.get("transactions", [])
                 for tx in transacciones:
                     if not isinstance(tx, dict):
                         continue
 
+                    monto_tx = tx.get("amount", 0)
+
                     if tx.get("to") == direccion:
-                        saldo += tx.get("amount", 0)
+                        saldo += monto_tx
                     elif tx.get("from") == direccion:
-                        saldo -= tx.get("amount", 0)
+                        saldo -= monto_tx
 
         print(f"\n💰 Saldo actual de {direccion}: {saldo} TSCOIN\n")
 
