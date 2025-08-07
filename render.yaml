@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: teslacoin-node
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python node.py
