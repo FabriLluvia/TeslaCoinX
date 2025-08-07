@@ -1,115 +1,128 @@
-import json, os
-from wallet import generar_wallet_con_prefijo
+import json
+import os
 from transactions import crear_transaccion
 
 WALLET_FILE = "wallet.tscoin"
-TRANSACTIONS_FILE = "transactions.tscoin"
-BLOCKCHAIN_FILE = "blockchain.tscoin"
 
-# === Auxiliares ===
-def cargar_json(file):
-    if not os.path.exists(file):
-        return []
-    with open(file, "r") as f:
-        return json.load(f)
-
-def guardar_json(file, data):
-    with open(file, "w") as f:
-        json.dump(data, f, indent=2)
-
-# === Crear billetera ===
 def crear_billetera():
-    print("\n=== Generación de Wallet ===")
-    print("1. Prefijo aleatorio de 2 caracteres")
-    print("2. Prefijo de 1 carácter elegido + 1 aleatorio")
-    print("3. Prefijo exacto de 2 caracteres elegido")
+    direccion = input("Crea una dirección de wallet (nombre o código): ").strip()
+    clave_publica = os.urandom(32).hex()  # Simulación
+    clave_privada = os.urandom(64).hex()  # Simulación
 
-    modo = int(input("Elige modo (1, 2 o 3): ").strip())
-    prefijo = ""
-    if modo == 2:
-        prefijo = input("Ingresa tu prefijo (1 carácter): ").strip()
-    elif modo == 3:
-        prefijo = input("Ingresa tu prefijo (2 caracteres): ").strip()
-
-    clave_privada, clave_publica, direccion = generar_wallet_con_prefijo(prefijo, modo)
     wallet = {
-        "clave_privada": clave_privada,
+        "direccion": direccion,
         "clave_publica": clave_publica,
-        "direccion": direccion
+        "clave_privada": clave_privada
     }
-    guardar_json(WALLET_FILE, wallet)
-    print("\n=== Billetera creada ===")
-    print("Dirección:", direccion)
-    print("Clave pública:", clave_publica)
 
-# === Ver billetera ===
+    with open(WALLET_FILE, "w") as f:
+        json.dump(wallet, f, indent=2)
+
+    print("\n✅ Billetera creada con éxito.\n")
+
 def ver_billetera():
-    if not os.path.exists(WALLET_FILE):
-        print("No existe billetera. Crea una primero.")
-        return
-    wallet = cargar_json(WALLET_FILE)
-    print("\n=== Tu billetera ===")
-    print("Dirección:", wallet["direccion"])
-    print("Clave pública:", wallet["clave_publica"])
+    try:
+        with open(WALLET_FILE, "r") as f:
+            wallet = json.load(f)
+            print("\n=== Tu billetera ===")
+            print("Dirección:", wallet.get("direccion", "Desconocida"))
+            print("Clave pública:", wallet.get("clave_publica", "Desconocida"))
+            print()
+    except FileNotFoundError:
+        print("\n⚠️ No se encontró una billetera. Crea una primero.\n")
 
-# === Ver clave privada ===
 def ver_clave_privada():
-    if not os.path.exists(WALLET_FILE):
-        print("No existe billetera.")
-        return
-    wallet = cargar_json(WALLET_FILE)
-    print("\n=== Clave privada ===")
-    print("ADVERTENCIA: NO COMPARTAS ESTA CLAVE")
-    print(wallet["clave_privada"])
+    try:
+        with open(WALLET_FILE, "r") as f:
+            wallet = json.load(f)
+            print("\n🔐 Clave privada:", wallet.get("clave_privada", "No encontrada"), "\n")
+    except FileNotFoundError:
+        print("\n⚠️ No se encontró una billetera. Crea una primero.\n")
 
-# === Transferir dinero ===
 def transferir_dinero():
-    if not os.path.exists(WALLET_FILE):
-        print("No existe billetera. Crea una primero.")
+    try:
+        with open(WALLET_FILE, "r") as f:
+            wallet = json.load(f)
+    except FileNotFoundError:
+        print("\n⚠️ No se encontró la billetera. Crea una primero.\n")
         return
-    wallet = cargar_json(WALLET_FILE)
+
     destino = input("Dirección destino: ").strip()
-    monto = float(input("Monto: "))
-    tx = crear_transaccion(wallet["clave_privada"], wallet["direccion"], destino, monto)
-    transacciones = cargar_json(TRANSACTIONS_FILE)
-    transacciones.append(tx)
-    guardar_json(TRANSACTIONS_FILE, transacciones)
-    print("\nTransacción guardada en transactions.tscoin")
-
-# === Consultar saldo ===
-def consultar_saldo():
-    if not os.path.exists(WALLET_FILE):
-        print("No existe billetera.")
+    try:
+        monto = float(input("Monto: "))
+    except ValueError:
+        print("❌ Monto inválido.")
         return
-    wallet = cargar_json(WALLET_FILE)
-    direccion = wallet["direccion"]
-    blockchain = cargar_json(BLOCKCHAIN_FILE)
 
-    saldo = 0.0
-    for bloque in blockchain:
-        for tx in bloque.get("transactions", []):
-            if tx["to"] == direccion:
-                saldo += tx["amount"]
-            if tx["from"] == direccion:
-                saldo -= tx["amount"]
-    print(f"\nSaldo actual de {direccion}: {saldo}")
+    crear_transaccion(wallet.get("direccion", ""), destino, monto)
 
-# === Menú principal ===
-if __name__ == "__main__":
-    while True:
-        print("\n=== Menú Wallet ===")
-        print("1. Crear billetera")
-        print("2. Ver billetera")
-        print("3. Ver clave privada")
-        print("4. Transferir dinero")
-        print("5. Consultar saldo")
-        print("6. Salir")
-        opcion = input("Elige opción: ").strip()
+def consultar_saldo():
+    try:
+        with open(WALLET_FILE, "r") as f:
+            wallet = json.load(f)
+    except FileNotFoundError:
+        print("\n⚠️ No se encontró wallet.tscoin. Por favor, crea una billetera primero.\n")
+        return
 
-        if opcion == "1": crear_billetera()
-        elif opcion == "2": ver_billetera()
-        elif opcion == "3": ver_clave_privada()
-        elif opcion == "4": transferir_dinero()
-        elif opcion == "5": consultar_saldo()
-        elif opcion == "6": break
-        else: print("Opción inválida")
+    direccion = wallet.get("direccion")
+    if not direccion:
+        print("\n⚠️ Dirección no encontrada en la wallet.\n")
+        return
+
+    saldo = 0
+
+    if not os.path.exists("blockchain.tscoin"):
+        print("\n⚠️ Archivo de blockchain no encontrado.\n")
+        return
+
+    try:
+        with open("blockchain.tscoin", "r") as archivo:
+            for linea in archivo:
+                if not linea.strip():
+                    continue
+
+                try:
+                    bloque = json.loads(linea)
+                except json.JSONDecodeError:
+                    continue
+
+                transacciones = bloque.get("transacciones", [])
+                for tx in transacciones:
+                    if not isinstance(tx, dict):
+                        continue
+
+                    if tx.get("to") == direccion:
+                        saldo += tx.get("amount", 0)
+                    elif tx.get("from") == direccion:
+                        saldo -= tx.get("amount", 0)
+
+        print(f"\n💰 Saldo actual de {direccion}: {saldo} TSCOIN\n")
+
+    except Exception as e:
+        print(f"\n❌ Error al leer blockchain: {e}\n")
+
+# ======= MENÚ =========
+while True:
+    print("=== Menú Wallet ===")
+    print("1. Crear billetera")
+    print("2. Ver billetera")
+    print("3. Ver clave privada")
+    print("4. Transferir dinero")
+    print("5. Consultar saldo")
+    print("6. Salir")
+    opcion = input("Elige opción: ")
+
+    if opcion == "1":
+        crear_billetera()
+    elif opcion == "2":
+        ver_billetera()
+    elif opcion == "3":
+        ver_clave_privada()
+    elif opcion == "4":
+        transferir_dinero()
+    elif opcion == "5":
+        consultar_saldo()
+    elif opcion == "6":
+        break
+    else:
+        print("Opción no válida.\n")
