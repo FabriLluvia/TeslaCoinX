@@ -1,10 +1,12 @@
 import json, os, time, hashlib, random, struct, math
+import requests  # 👈 Necesario para enviar el bloque
 
 TRANSACTIONS_FILE = "transactions.tscoin"
 BLOCKCHAIN_FILE = "blockchain.tscoin"
-DIFFICULTY = 3  # puedes ajustar (2-3 en Python para pruebas)
+REPLIT_SERVER_URL = "https://97f8658f-c24a-4e9d-9e7c-813890df2937-00-2qyl45og2tx6y.picard.replit.dev/submit_block"
+DIFFICULTY = 3
 
-DATASET_SIZE = 256 * 1024 * 1024  # 256MB dataset
+DATASET_SIZE = 256 * 1024 * 1024
 CHUNK_SIZE = 64
 
 # --- Dataset y programa dinámico ---
@@ -87,8 +89,21 @@ def minar_bloque(bloque):
     nonce, hash_result, tiempo = prueba_de_trabajo(bloque["previous_hash"], datos, DIFFICULTY)
     bloque["nonce"] = nonce
     bloque["hash"] = hash_result
-    print(f"Bloque minado con nonce {nonce} en {tiempo:.2f}s -> {hash_result}")
+    print(f"✅ Bloque minado con nonce {nonce} en {tiempo:.2f}s -> {hash_result}")
     return bloque
+
+def enviar_al_servidor(bloque):
+    try:
+        response = requests.post(REPLIT_SERVER_URL, json=bloque)
+        if response.status_code == 201:
+            print("🌍 Bloque enviado al servidor Replit con éxito.")
+            return True
+        else:
+            print(f"⚠️ Error al enviar bloque al servidor: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ No se pudo conectar al servidor Replit: {e}")
+        return False
 
 def minar(miner_wallet):
     blockchain = cargar_json(BLOCKCHAIN_FILE)
@@ -97,7 +112,6 @@ def minar(miner_wallet):
     index = len(blockchain)
     reward = calcular_reward(index)
 
-    # Coinbase transaction
     transacciones.append({
         "from": "NETWORK",
         "to": miner_wallet,
@@ -118,13 +132,18 @@ def minar(miner_wallet):
         "hash": ""
     }
 
-    print(f"Minando bloque #{index} con recompensa: {reward} TSCOIN ...")
+    print(f"🚀 Minando bloque #{index} con recompensa: {reward} TSCOIN ...")
     bloque_mined = minar_bloque(bloque)
 
-    blockchain.append(bloque_mined)
-    guardar_json(BLOCKCHAIN_FILE, blockchain)
-    guardar_json(TRANSACTIONS_FILE, [])  # limpiar transacciones pendientes
-    print("Bloque agregado a blockchain y transacciones limpiadas.")
+    # Enviar primero al servidor
+    if enviar_al_servidor(bloque_mined):
+        # Si se acepta, guardar localmente
+        blockchain.append(bloque_mined)
+        guardar_json(BLOCKCHAIN_FILE, blockchain)
+        guardar_json(TRANSACTIONS_FILE, [])
+        print("🗃️ Bloque guardado localmente y transacciones limpiadas.")
+    else:
+        print("⚠️ No se guardó localmente el bloque porque no fue aceptado por el servidor.")
 
 if __name__ == "__main__":
     miner_wallet = input("Ingresa la dirección de tu wallet de minero: ").strip()

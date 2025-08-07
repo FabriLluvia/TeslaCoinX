@@ -1,8 +1,19 @@
 import json, os, time, random, secrets
 import psutil  # Para CPU y temperatura
-from miner import minar_bloque, calcular_reward, cargar_json, guardar_json, obtener_ultimo_hash, BLOCKCHAIN_FILE, TRANSACTIONS_FILE
+import requests  # 👈 Para enviar bloques al servidor Replit
+
+from miner import (
+    minar_bloque,
+    calcular_reward,
+    cargar_json,
+    guardar_json,
+    obtener_ultimo_hash,
+    BLOCKCHAIN_FILE,
+    TRANSACTIONS_FILE
+)
 
 CONFIG_FILE = "minerconfig.tscoin"
+REPLIT_SERVER_URL = "https://97f8658f-c24a-4e9d-9e7c-813890df2937-00-2qyl45og2tx6y.picard.replit.dev/submit_block"
 
 # --- Configuración ---
 def cargar_config():
@@ -105,6 +116,16 @@ def iniciar():
         guardar_json(TRANSACTIONS_FILE, [])
         print(f"✅ Bloque #{index} minado en {t_fin - t_inicio:.2f}s → {bloque_mined['hash']}")
         bloques_minados += 1
+
+        # Enviar al servidor Replit
+        try:
+            response = requests.post(REPLIT_SERVER_URL, json=bloque_mined)
+            if response.status_code == 201:
+                print("🌍 Bloque enviado al servidor Replit con éxito.")
+            else:
+                print(f"⚠️ Error al enviar bloque al servidor: {response.status_code}")
+        except Exception as e:
+            print(f"❌ No se pudo conectar al servidor Replit: {e}")
 
         print(f"🛌 Descansando {config['rest_time']} segundos...")
         time.sleep(config["rest_time"])
