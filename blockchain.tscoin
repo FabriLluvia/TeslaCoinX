@@ -43,5 +43,32 @@
     "salt": "f5f403a39891fa70",
     "nonce": 15511,
     "hash": "000d43ec0f39597a85255206d58763c019587de052890c895fbfa7d58c5614912f682420fc79b82444c128e461534120db31186002371dc3f11eba9c877426ad"
+  },
+  {
+    "index": 2,
+    "timestamp": 1754599921,
+    "transactions": [
+      {
+        "from": "TTcWX85JUNx3cuYY9nUkvW5TUn6DUbYNiSAD9GAbWcy4u4Ldx34j",
+        "to": "FLdWncPBwDYJ5SKTn1ARV7z6ZMrhfK6qg3bJieftGyX3YcTcHAUv",
+        "amount": 100.0,
+        "timestamp": 1754599900,
+        "firma": "e3cedd265b985c1132c477779e8ccb02b4a5e92e2501cb4c299743c175f6ab29"
+      },
+      null,
+      {
+        "from": "NETWORK",
+        "to": "FLdWncPBwDYJ5SKTn1ARV7z6ZMrhfK6qg3bJieftGyX3YcTcHAUv",
+        "amount": 400.0,
+        "timestamp": 1754599921,
+        "firma": ""
+      }
+    ],
+    "miner_wallet": "FLdWncPBwDYJ5SKTn1ARV7z6ZMrhfK6qg3bJieftGyX3YcTcHAUv",
+    "reward": 400.0,
+    "previous_hash": "000d43ec0f39597a85255206d58763c019587de052890c895fbfa7d58c5614912f682420fc79b82444c128e461534120db31186002371dc3f11eba9c877426ad",
+    "salt": "0f963f5fcf796276",
+    "nonce": 9690,
+    "hash": "000872ba151d0d5791882c8e62fd252551ab4b0fe539f8636ba53ae004198d6de736f086bdf1896ef392c9c3796ed86cbd1d19185ca28e1b4b985d141aa76d0a"
   }
 ]
