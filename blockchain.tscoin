@@ -1,0 +1,21 @@
+[
+  {
+    "index": 0,
+    "timestamp": 1754590973,
+    "transactions": [
+      {
+        "from": "NETWORK",
+        "to": "FLdWncPBwDYJ5SKTn1ARV7z6ZMrhfK6qg3bJieftGyX3YcTcHAUv",
+        "amount": 400.0,
+        "timestamp": 1754590973,
+        "firma": ""
+      }
+    ],
+    "miner_wallet": "FLdWncPBwDYJ5SKTn1ARV7z6ZMrhfK6qg3bJieftGyX3YcTcHAUv",
+    "reward": 400.0,
+    "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "salt": "44737f8e40566f11",
+    "nonce": 2101,
+    "hash": "000cf13fcf6fdb24dab25763e656764df42349fe9ec73cfd0240a132d63224af657b4934839fccde1c418b51a60b77b3de548bba6e1da57e6519f4374c62c3ee"
+  }
+]
